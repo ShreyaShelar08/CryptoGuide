@@ -1,6 +1,6 @@
 import React from 'react';
 import { useReveal } from '../hooks/useReveal';
-import Modules from './Modules';
+
 
 export function CTA({ onGetStarted}) {
   const [ref, visible] = useReveal();

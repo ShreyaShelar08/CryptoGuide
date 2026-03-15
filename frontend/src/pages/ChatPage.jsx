@@ -197,7 +197,7 @@ function InputBar({ onSend, disabled }) {
 
 // ── Main ChatPage ─────────────────────────────────────────────────────────────
 export default function ChatPage({ onLogout }) {
-  const { userProfile, logout, authUser, setCurrentPage, messages, setMessages, activeSessionId, setActiveSessionId, roadmap, setRoadmap, sessions, setSessions, historyLoaded, setHistoryLoaded, history, setHistory, portfolio, loadUserHistory } = useApp();
+  const { userProfile, logout, authUser, setCurrentPage, messages, setMessages, activeSessionId, setActiveSessionId, roadmap, setRoadmap, sessions, setSessions, historyLoaded, setHistoryLoaded, history, setHistory, portfolio } = useApp();
   const [isTyping, setIsTyping] = useState(false);
   const [roadmapLoading, setRoadmapLoading] = useState(false);
   const messagesEndRef = useRef(null);
@@ -360,7 +360,7 @@ Make the steps specific, practical and ordered from beginner to advanced for the
     } finally {
       setRoadmapLoading(false);
     }
-  }, [userProfile]);
+  }, [now, setMessages, setRoadmap, userProfile]);
 
   // ── Send message ──────────────────────────────────────────────────────────────
   const sendMessage = useCallback(async (text) => {

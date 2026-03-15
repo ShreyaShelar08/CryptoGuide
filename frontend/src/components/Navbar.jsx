@@ -28,7 +28,7 @@ export default function Navbar({ onGetStarted }) {
       borderBottom: '1px solid rgba(99,102,241,0.08)',
       transition: 'background 0.3s',
     }}>
-      <a href="#" style={{ display: 'flex', alignItems: 'center', gap: '10px', textDecoration: 'none' }}>
+      <a href="/" style={{ display: 'flex', alignItems: 'center', gap: '10px', textDecoration: 'none' }}>
         <div style={{ width: '38px', height: '38px', background: 'linear-gradient(135deg,#6366f1,#8b5cf6)', borderRadius: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '18px', boxShadow: '0 0 20px rgba(99,102,241,0.4)' }}>⬡</div>
         <span style={{ fontFamily: "'Cabinet Grotesk',sans-serif", fontWeight: 800, fontSize: '20px', color: '#f0f0ff', letterSpacing: '-0.5px' }}>CryptoGuide</span>
       </a>
