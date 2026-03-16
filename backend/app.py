@@ -10,15 +10,12 @@ from dotenv import load_dotenv
 load_dotenv()
 
 app = Flask(__name__)
-# Allow CORS for common development ports
+# Allow CORS for development + all Vercel deployments (preview & production)
 CORS(app, origins=[
-    "http://localhost:3000", 
-    "http://127.0.0.1:3000",
-    "http://localhost:5173", 
-    "http://127.0.0.1:5173",
-    "http://localhost:5174",
-    "http://127.0.0.1:5174",
-    "https://crypto-guide-six.vercel.app"
+    r"http://localhost:\d+",
+    r"http://127\.0\.0\.1:\d+",
+    r"https://crypto-guide.*\.vercel\.app",
+    r"https://.*shreyashelar08.*\.vercel\.app",
 ])
 
 # ── Config ────────────────────────────────────────────────────────────────────
