@@ -1,7 +1,7 @@
 // ── CryptoGuide API Service ───────────────────────────────────────────────────
 // Routes all ASI-1 calls through the Flask backend for security & rate limiting
 
-const BACKEND_URL = "http://localhost:5000";
+const BACKEND_URL = process.env.REACT_APP_BACKEND_URL || "http://localhost:5000";
 
 // ── Main chat function ────────────────────────────────────────────────────────
 export async function callASI1(messages, profile, portfolio = {}) {
