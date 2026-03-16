@@ -1,7 +1,7 @@
 // ── CryptoGuide API Service ───────────────────────────────────────────────────
 // Routes all ASI-1 calls through the Flask backend for security & rate limiting
 
-const BACKEND_URL = process.env.REACT_APP_BACKEND_URL || "http://localhost:5000";
+const BACKEND_URL = "https://cryptoguide-production.up.railway.app";
 
 // ── Main chat function ────────────────────────────────────────────────────────
 export async function callASI1(messages, profile, portfolio = {}) {
@@ -88,7 +88,7 @@ function getDemoResponse(msg, profile) {
   if (m.includes("safe") || m.includes("scam"))
     return `🛡️ Great that you're thinking about security!\n\n**Top 5 rules:**\n1. Never share your seed phrase or private key\n2. Double-check wallet addresses before sending\n3. Be suspicious of anything "too good to be true"\n4. Use a hardware wallet for large amounts\n5. Verify every project on official channels\n\n🚩 **Red flags:** Unsolicited DMs, urgent deadlines, "guaranteed returns", requests to connect your wallet to unknown sites.`;
 
-  if (m.includes("hello") || m.includes("hi") || m.includes("start") || m.includes("module 1"))
+  if (m.includes("hello") || m.includes("hi") || m.includes("start") || m.includes("hey") || m.includes("module 1"))
     return `Hey${name}! 👋 Great to have you here — I'm your personal Web3 guide powered by **ASI-1**.\n\nNo matter where you're starting from, we'll go step by step. There are no dumb questions here.\n\n🚀 **Ready to begin?** Let's start with blockchain — the foundation of everything in Web3. Want me to explain it?`;
 
   return `That's a great question${name}! 🤔 Web3 can feel overwhelming at first, but once you understand the 3 core concepts — blockchain, wallets, and keys — everything else clicks into place.\n\n💡 Try clicking any topic in the **Quick Learn** panel on the right, or follow the modules in the sidebar for a structured path.\n\nWhat would you like to explore?`;
