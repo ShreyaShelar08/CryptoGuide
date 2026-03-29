@@ -6,7 +6,7 @@ import {
 } from 'firebase/auth';
 import {
   doc, setDoc, getDoc,
-  collection, getDocs, query, orderBy,
+  collection, getDocs,
   deleteDoc, serverTimestamp,
 } from 'firebase/firestore';
 import { auth, db } from './config';
@@ -113,33 +113,26 @@ export const saveChatSession = async (uid, sessionId, messages) => {
 /**
  * List all chat sessions for a user, sorted by most recently updated.
  * Returns the full session objects including messages.
+ * NOTE: We avoid orderBy() to prevent hanging when Firestore index is missing.
+ * Instead, we fetch all docs and sort in JavaScript.
  */
 export const listChatSessions = async (uid) => {
   if (!uid) return [];
   try {
-    const q = query(
-      collection(db, 'users', uid, 'chats'),
-      orderBy('updatedAt', 'desc')
-    );
-    const snap = await getDocs(q);
-    return snap.docs.map(d => ({ id: d.id, ...d.data() }));
+    console.log('[listChatSessions] Fetching chats for uid:', uid);
+    const snap = await getDocs(collection(db, 'users', uid, 'chats'));
+    console.log('[listChatSessions] Got', snap.docs.length, 'docs');
+    const chats = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+    const getTime = (t) => {
+      if (!t) return 0;
+      if (t.seconds) return t.seconds;
+      if (t.toDate) return Math.floor(t.toDate().getTime() / 1000);
+      return Math.floor(new Date(t).getTime() / 1000) || 0;
+    };
+    return chats.sort((a, b) => getTime(b.updatedAt) - getTime(a.updatedAt));
   } catch (err) {
-    // Fallback: if the index isn't ready yet, sort in JS
-    console.warn('listChatSessions orderBy failed, falling back to JS sort:', err.message);
-    try {
-      const snap = await getDocs(collection(db, 'users', uid, 'chats'));
-      const chats = snap.docs.map(d => ({ id: d.id, ...d.data() }));
-      const getTime = (t) => {
-        if (!t) return 0;
-        if (t.seconds) return t.seconds;
-        if (t.toDate) return Math.floor(t.toDate().getTime() / 1000);
-        return Math.floor(new Date(t).getTime() / 1000) || 0;
-      };
-      return chats.sort((a, b) => getTime(b.updatedAt) - getTime(a.updatedAt));
-    } catch (fallbackErr) {
-      console.error('listChatSessions fallback error:', fallbackErr);
-      return [];
-    }
+    console.error('[listChatSessions] Error:', err);
+    return [];
   }
 };
 

@@ -9,10 +9,8 @@ import PortfolioPage from './pages/PortfolioPage';
 
 function InnerApp() {
   const { authUser, authLoaded, onboardingDone, currentPage } = useApp();
-  // Only used for landing → login navigation (not auth routing)
   const [showLogin, setShowLogin] = useState(false);
 
-  // Show spinner while Firebase + Firestore are loading
   if (!authLoaded) {
     return (
       <div style={{ height: '100vh', background: '#07092b', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
@@ -25,8 +23,6 @@ function InnerApp() {
     );
   }
 
-  // ── Routing: derived directly from state, no useEffect needed ──────────────
-
   // Not logged in
   if (!authUser) {
     if (showLogin) return <LoginPage onLogin={() => setShowLogin(false)} onBack={() => setShowLogin(false)} />;
@@ -35,14 +31,12 @@ function InnerApp() {
 
   // Logged in but onboarding not done
   if (!onboardingDone) {
-    return <OnboardingPage onComplete={() => {/* context handles state */ }} />;
+    return <OnboardingPage onComplete={() => { }} />;
   }
 
-  // Logged in + onboarding done → chat or portfolio
-  if (currentPage === 'portfolio') {
-    return <PortfolioPage onLogout={() => setShowLogin(false)} />;
-  }
-  return <ChatPage onLogout={() => setShowLogin(false)} />;
+  // ── Page routing ──────────────────────────────────────────────────────────
+  if (currentPage === 'portfolio') return <PortfolioPage onLogout={() => setShowLogin(false)} />;
+   return <ChatPage onLogout={() => setShowLogin(false)} />;
 }
 
 export default function App() {

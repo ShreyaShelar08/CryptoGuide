@@ -68,57 +68,43 @@ export function AppProvider({ children }) {
     }
   }, [activeSessionId, authUser?.uid]);
 
-  // ── Core: loadUserHistory — called on every login (like your reference code) ─
+  // ── Core: loadUserHistory — called on every login ─────────────────────────
   const loadUserHistory = useCallback(async (uid, displayName, goal) => {
-    // Step 1: Instantly load from localStorage cache (zero network delay)
-    // localStorage was already seeded in onAuthChange before any await.
-    // Here we load the active session's messages from cache instantly,
-    // then revalidate everything from Firestore in the background.
+    console.log('[loadUserHistory] START — uid:', uid);
 
-    const lastActiveId = localStorage.getItem(`activeSessionId_${uid}`) || 'main';
-    const cached = localStorage.getItem(`sessions_${uid}`);
-    if (cached) {
-      try {
-        const cachedSessions = JSON.parse(cached);
-        const lastSession = cachedSessions.find(s => s.id === lastActiveId);
-        if (lastSession?.messages?.length > 0) {
-          setMessages(lastSession.messages);
-          setHistory(lastSession.messages.map(m => ({ role: m.role, content: m.content })));
-          setHistoryLoaded(true); // sidebar & chat are ready — Firestore revalidates in background
-        }
-      } catch (e) { /* ignore */ }
-    }
-
-    // Firestore revalidation (background — user already sees data from cache above)
+    // Step 1: Fetch sessions from Firestore to populate the sidebar history
     try {
+      console.log('[loadUserHistory] Fetching from Firestore...');
       const firestoreSessions = await listChatSessions(uid);
+      console.log('[loadUserHistory] Firestore returned', firestoreSessions.length, 'sessions');
 
-      // Smart merge: Firestore wins, but keep local-only pending sessions
-      setSessions(prev => {
-        const firestoreIds = new Set(firestoreSessions.map(s => s.id));
-        const localOnly = prev.filter(s => !firestoreIds.has(s.id));
-        return [...firestoreSessions, ...localOnly];
-      });
-
-      // Silently update active session messages if Firestore has fresher data
-      const activeInFirestore = firestoreSessions.find(s => s.id === lastActiveId);
-      if (activeInFirestore?.messages?.length > 0) {
-        setMessages(prev => {
-          const prevStr = JSON.stringify(prev.map(m => ({ role: m.role, content: m.content })));
-          const newStr = JSON.stringify(activeInFirestore.messages.map(m => ({ role: m.role, content: m.content })));
-          return prevStr === newStr ? prev : activeInFirestore.messages;
-        });
-        setHistory(activeInFirestore.messages.map(m => ({ role: m.role, content: m.content })));
-      } else if (firestoreSessions.length === 0 && !cached) {
-        // Brand new user with no history anywhere — show welcome
-        setMessages([makeWelcomeMsg(displayName, goal)]);
-        setHistory([]);
+      if (firestoreSessions.length > 0) {
+        // Load all past sessions into sidebar
+        setSessions(firestoreSessions);
+        console.log('[loadUserHistory] ✅ Loaded', firestoreSessions.length, 'sessions into sidebar');
       }
     } catch (err) {
-      console.error('loadUserHistory Firestore error:', err);
-    } finally {
-      setHistoryLoaded(true);
+      console.error('[loadUserHistory] ❌ Firestore error:', err);
+      // Fallback: try localStorage cache for sidebar
+      const cached = localStorage.getItem(`sessions_${uid}`);
+      if (cached) {
+        try {
+          const cachedSessions = JSON.parse(cached);
+          if (cachedSessions && cachedSessions.length > 0) {
+            setSessions(cachedSessions);
+          }
+        } catch (e) { console.warn('[loadUserHistory] localStorage parse error:', e); }
+      }
     }
+
+    // Step 2: Always start a fresh new chat with a greeting on login
+    const newSessionId = 'session_' + Date.now();
+    console.log('[loadUserHistory] ✅ Starting fresh chat session:', newSessionId);
+    setMessages([makeWelcomeMsg(displayName, goal)]);
+    setHistory([]);
+    setActiveSessionId(newSessionId);
+    setHistoryLoaded(true);
+    console.log('[loadUserHistory] DONE');
   }, []);
 
   // ── Auth state listener ──────────────────────────────────────────────────────
@@ -143,57 +129,83 @@ export function AppProvider({ children }) {
           } catch (e) { /* ignore malformed cache */ }
         }
 
-        // Seed sessions & active session from localStorage RIGHT NOW (zero delay)
+        // ─── INSTANT: Load sidebar sessions from localStorage (zero delay) ───
         const cachedSessions = localStorage.getItem(`sessions_${firebaseUser.uid}`);
         if (cachedSessions) {
           try {
             const parsed = JSON.parse(cachedSessions);
-            if (parsed.length > 0) {
+            if (Array.isArray(parsed) && parsed.length > 0) {
               setSessions(parsed);
-              const cachedActiveId = localStorage.getItem(`activeSessionId_${firebaseUser.uid}`);
-              if (cachedActiveId) setActiveSessionId(cachedActiveId);
             }
           } catch (e) { /* ignore malformed cache */ }
         }
-        // ─────────────────────────────────────────────────────────────────────
 
-        try {
-          const profile = await loadUserProfile(firebaseUser.uid);
+        // ─── INSTANT: Show greeting message RIGHT NOW (zero delay) ───────
+        // Read cached goal from localStorage for instant personalization
+        const cachedGoal = localStorage.getItem(`userGoal_${firebaseUser.uid}`) || null;
+        const newSessionId = 'session_' + Date.now();
+        setMessages([makeWelcomeMsg(initialName, cachedGoal)]);
+        setHistory([]);
+        setActiveSessionId(newSessionId);
+        setHistoryLoaded(true);
 
+        // ─── BACKGROUND: Load profile & sidebar sessions (non-blocking) ──
+        (async () => {
+          try {
+            const profile = await loadUserProfile(firebaseUser.uid);
 
-          const displayName = profile?.name || initialName;
-          const goal = profile?.goal || null;
+            const displayName = profile?.name || initialName;
+            const goal = profile?.goal || null;
 
-          if (profile) {
-            setUserProfile({
-              ...profile,
-              name: displayName,
-            });
-            if (profile.portfolio) {
-              // Firestore data is authoritative — overwrite localStorage cache
-              setPortfolioState(profile.portfolio);
-            }
+            if (profile) {
+              setUserProfile({
+                ...profile,
+                name: displayName,
+              });
+              // Cache goal for instant use on next login
+              if (goal) localStorage.setItem(`userGoal_${firebaseUser.uid}`, goal);
 
-            const isFinished = profile.onboardingDone === true || (profile.goal && profile.level);
-            if (isFinished) {
-              setOnboardingDone(true);
-              localStorage.setItem('onboardingDone', 'true');
+              if (profile.portfolio) {
+                setPortfolioState(profile.portfolio);
+              }
+
+              const isFinished = profile.onboardingDone === true || (profile.goal && profile.level);
+              if (isFinished) {
+                setOnboardingDone(true);
+                localStorage.setItem('onboardingDone', 'true');
+              } else {
+                setOnboardingDone(false);
+                localStorage.removeItem('onboardingDone');
+              }
+
+              // Update greeting with accurate name/goal if different from initial
+              if (displayName !== initialName || goal !== cachedGoal) {
+                setMessages([makeWelcomeMsg(displayName, goal)]);
+              }
             } else {
+              setUserProfile({ name: initialName, goal: null, level: null });
               setOnboardingDone(false);
               localStorage.removeItem('onboardingDone');
             }
-          } else {
-            setUserProfile({ name: initialName, goal: null, level: null });
-            setOnboardingDone(false);
-            localStorage.removeItem('onboardingDone');
+
+            // Load sidebar chat history from Firestore (background)
+            try {
+              const firestoreSessions = await listChatSessions(firebaseUser.uid);
+              if (firestoreSessions.length > 0) {
+                setSessions(firestoreSessions);
+              }
+            } catch (e) {
+              console.error('[loadSessions] Firestore error:', e);
+              // Fallback: try localStorage
+              const cached = localStorage.getItem(`sessions_${firebaseUser.uid}`);
+              if (cached) {
+                try { setSessions(JSON.parse(cached)); } catch (_) { }
+              }
+            }
+          } catch (err) {
+            console.error('Error during login setup:', err);
           }
-
-          // 🔑 Load this user's full chat history (mirrors your reference code pattern)
-          await loadUserHistory(firebaseUser.uid, displayName, goal);
-
-        } catch (err) {
-          console.error('Error during login setup:', err);
-        }
+        })();
       } else {
         // ── Logout: wipe all in-memory state ──
         setAuthUser(null);

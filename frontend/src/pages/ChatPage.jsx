@@ -96,7 +96,6 @@ function HistoryPanel({ sessions, onSelectSession, activeSessionId, onDeleteSess
               <div style={{ fontSize: '12px', fontWeight: 800, color: activeSessionId === s.id ? '#f0f0ff' : '#a8b4d8', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', pointerEvents: 'none' }}>
                 {s.messages?.find(m => m.role === 'user')?.content.slice(0, 40) || s.messages?.[0]?.content.slice(0, 40) || 'Previous Chat'}
               </div>
-
               <button onClick={(e) => { e.stopPropagation(); if (window.confirm('Delete this chat?')) onDeleteSession(s.id); }}
                 style={{ position: 'absolute', top: '10px', right: '10px', background: 'transparent', border: 'none', color: '#6270a0', fontSize: '14px', cursor: 'pointer', zIndex: 5 }}>×</button>
             </div>
@@ -114,58 +113,158 @@ function HistoryPanel({ sessions, onSelectSession, activeSessionId, onDeleteSess
   );
 }
 
-// ── Roadmap Panel (right sidebar) ────────────────────────────────────────────
-function RoadmapPanel({ roadmap, loading, onGenerate }) {
+// ── News Feed Panel (Live market prices via CoinGecko free API) ───────────────
+function NewsFeed({ onAskAI }) {
+  const [coins, setCoins] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(false);
+
+  useEffect(() => {
+    fetch('https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&order=market_cap_desc&per_page=8&page=1&sparkline=false&price_change_percentage=24h')
+      .then(r => r.json())
+      .then(data => {
+        if (Array.isArray(data) && data.length > 0) { setCoins(data); setLoading(false); }
+        else { setError(true); setLoading(false); }
+      })
+      .catch(() => { setError(true); setLoading(false); });
+  }, []);
+
+  if (loading) return (
+    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '30px 0', gap: '10px' }}>
+      <div style={{ width: '24px', height: '24px', border: '2.5px solid rgba(99,102,241,0.3)', borderTopColor: '#6366f1', borderRadius: '50%', animation: 'spin 0.8s linear infinite' }} />
+      <div style={{ fontSize: '12px', color: '#6270a0' }}>Loading market data...</div>
+    </div>
+  );
+
+  if (error || coins.length === 0) return (
+    <div style={{ background: '#0f1340', border: '1px solid rgba(99,102,241,0.1)', borderRadius: '12px', padding: '16px', textAlign: 'center' }}>
+      <div style={{ fontSize: '20px', marginBottom: '8px' }}>📡</div>
+      <div style={{ fontSize: '12px', color: '#6270a0', lineHeight: 1.6 }}>Market data unavailable. Ask the AI about current crypto trends!</div>
+      <button onClick={() => onAskAI('What are the latest trends in the crypto market right now?')}
+        style={{ marginTop: '12px', background: 'linear-gradient(135deg,#6366f1,#8b5cf6)', border: 'none', color: 'white', padding: '8px 16px', borderRadius: '8px', fontSize: '12px', fontWeight: 700, cursor: 'pointer' }}>
+        Ask AI Instead
+      </button>
+    </div>
+  );
+
   return (
-    <div style={{ width: '270px', minWidth: '270px', height: '100%', background: 'rgba(11,14,56,0.7)', backdropFilter: 'blur(12px)', borderLeft: '1px solid rgba(99,102,241,0.08)', display: 'flex', flexDirection: 'column', padding: '20px 14px', overflowY: 'auto' }}>
-      <div style={{ fontSize: '10px', color: '#6270a0', letterSpacing: '1.5px', textTransform: 'uppercase', padding: '0 4px', marginBottom: '16px' }}>🗺️ AI Roadmap</div>
-
-      {!roadmap && !loading && (
-        <div style={{ background: '#0f1340', border: '1px solid rgba(99,102,241,0.12)', borderRadius: '14px', padding: '16px', marginBottom: '12px' }}>
-          <div style={{ fontSize: '13px', color: '#a8b4d8', lineHeight: 1.6, marginBottom: '14px' }}>
-            Get a personalized step-by-step Web3 learning roadmap built by ASI-1 just for you.
-          </div>
-          <button onClick={onGenerate}
-            style={{ width: '100%', background: 'linear-gradient(135deg,#6366f1,#8b5cf6)', border: 'none', color: 'white', padding: '11px', borderRadius: '10px', fontSize: '13px', fontWeight: 700, cursor: 'pointer', fontFamily: "'Cabinet Grotesk',sans-serif", boxShadow: '0 0 16px rgba(99,102,241,0.35)', transition: 'all 0.2s' }}
-            onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-1px)'; e.currentTarget.style.boxShadow = '0 6px 20px rgba(99,102,241,0.5)'; }}
-            onMouseLeave={e => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = '0 0 16px rgba(99,102,241,0.35)'; }}>
-            ✨ Generate My Roadmap
-          </button>
-        </div>
-      )}
-
-      {loading && (
-        <div style={{ background: '#0f1340', border: '1px solid rgba(99,102,241,0.12)', borderRadius: '14px', padding: '20px', marginBottom: '12px', textAlign: 'center' }}>
-          <div style={{ width: '28px', height: '28px', border: '2.5px solid rgba(99,102,241,0.3)', borderTopColor: '#6366f1', borderRadius: '50%', animation: 'spin 0.8s linear infinite', margin: '0 auto 12px' }} />
-          <div style={{ fontSize: '12px', color: '#6270a0' }}>ASI-1 is building your roadmap...</div>
-          <style>{`@keyframes spin{to{transform:rotate(360deg);}}`}</style>
-        </div>
-      )}
-
-      {roadmap && (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-          {roadmap.map((step, i) => (
-            <div key={i} style={{ background: step.done ? 'rgba(52,211,153,0.06)' : '#0f1340', border: step.done ? '1px solid rgba(52,211,153,0.15)' : '1px solid rgba(99,102,241,0.1)', borderRadius: '12px', padding: '12px 14px', transition: 'all 0.2s' }}>
-              <div style={{ display: 'flex', alignItems: 'flex-start', gap: '10px' }}>
-                <div style={{ width: '24px', height: '24px', borderRadius: '6px', flexShrink: 0, background: step.done ? 'rgba(52,211,153,0.2)' : 'linear-gradient(135deg,#6366f1,#8b5cf6)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '11px', fontWeight: 800, color: step.done ? '#34d399' : 'white', marginTop: '1px' }}>{step.done ? '✓' : i + 1}</div>
-                <div style={{ flex: 1, minWidth: 0 }}>
-                  <div style={{ fontSize: '12px', fontWeight: 700, color: step.done ? '#34d399' : '#f0f0ff', marginBottom: '3px', fontFamily: "'Cabinet Grotesk',sans-serif" }}>{step.title}</div>
-                  <div style={{ fontSize: '11px', color: '#6270a0', lineHeight: 1.5 }}>{step.desc}</div>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+      <div style={{ fontSize: '10px', color: '#6270a0', letterSpacing: '1px', textTransform: 'uppercase', marginBottom: '4px' }}>📊 Live Market Prices</div>
+      {coins.map(coin => {
+        const change = coin.price_change_percentage_24h;
+        const isUp = change >= 0;
+        return (
+          <div key={coin.id} style={{ background: '#0f1340', border: '1px solid rgba(99,102,241,0.1)', borderRadius: '12px', padding: '10px 12px', transition: 'all 0.2s' }}
+            onMouseEnter={e => e.currentTarget.style.borderColor = 'rgba(99,102,241,0.3)'}
+            onMouseLeave={e => e.currentTarget.style.borderColor = 'rgba(99,102,241,0.1)'}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <img src={coin.image} alt={coin.name} style={{ width: '20px', height: '20px', borderRadius: '50%' }} onError={e => e.target.style.display = 'none'} />
+                <div>
+                  <div style={{ fontSize: '12px', fontWeight: 700, color: '#f0f0ff', fontFamily: "'Cabinet Grotesk',sans-serif" }}>{coin.name}</div>
+                  <div style={{ fontSize: '10px', color: '#6270a0', textTransform: 'uppercase' }}>{coin.symbol}</div>
+                </div>
+              </div>
+              <div style={{ textAlign: 'right' }}>
+                <div style={{ fontSize: '13px', fontWeight: 700, color: '#f0f0ff' }}>${coin.current_price?.toLocaleString()}</div>
+                <div style={{ fontSize: '11px', fontWeight: 600, color: isUp ? '#34d399' : '#f87171' }}>
+                  {isUp ? '▲' : '▼'} {Math.abs(change || 0).toFixed(2)}%
                 </div>
               </div>
             </div>
-          ))}
-          <button onClick={onGenerate}
-            style={{ marginTop: '6px', background: 'transparent', border: '1px solid rgba(99,102,241,0.2)', color: '#6270a0', padding: '8px', borderRadius: '10px', fontSize: '11px', cursor: 'pointer', fontFamily: "'Plus Jakarta Sans',sans-serif", transition: 'all 0.2s' }}
-            onMouseEnter={e => { e.currentTarget.style.borderColor = 'rgba(99,102,241,0.4)'; e.currentTarget.style.color = '#a5b4fc'; }}
-            onMouseLeave={e => { e.currentTarget.style.borderColor = 'rgba(99,102,241,0.2)'; e.currentTarget.style.color = '#6270a0'; }}>
-            ↺ Regenerate Roadmap
-          </button>
-        </div>
-      )}
+            <button onClick={() => onAskAI(`Explain ${coin.name} (${coin.symbol.toUpperCase()}) to a beginner — what is it, what is it used for, and why is it ${isUp ? 'up' : 'down'} ${Math.abs(change || 0).toFixed(2)}% today?`)}
+              style={{ width: '100%', background: 'transparent', border: '1px solid rgba(99,102,241,0.2)', color: '#a5b4fc', padding: '5px', borderRadius: '7px', fontSize: '11px', fontWeight: 600, cursor: 'pointer', transition: 'all 0.2s' }}
+              onMouseEnter={e => { e.currentTarget.style.background = 'rgba(99,102,241,0.1)'; e.currentTarget.style.borderColor = 'rgba(99,102,241,0.4)'; }}
+              onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.borderColor = 'rgba(99,102,241,0.2)'; }}>
+              💬 Ask AI about {coin.symbol.toUpperCase()}
+            </button>
+          </div>
+        );
+      })}
     </div>
   );
 }
+
+// ── Roadmap + News Panel (right sidebar) ─────────────────────────────────────
+function RoadmapPanel({ roadmap, loading, onGenerate, onAskAI }) {
+  const [activeTab, setActiveTab] = useState('roadmap'); // 'roadmap' | 'news'
+
+  return (
+    <div style={{ width: '270px', minWidth: '270px', height: '100%', background: 'rgba(11,14,56,0.7)', backdropFilter: 'blur(12px)', borderLeft: '1px solid rgba(99,102,241,0.08)', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+
+      {/* Tab switcher */}
+      <div style={{ padding: '14px 14px 0', flexShrink: 0 }}>
+        <div style={{ display: 'flex', background: 'rgba(99,102,241,0.08)', borderRadius: '10px', padding: '3px', marginBottom: '12px' }}>
+          {[['roadmap', '🗺️ Roadmap'], ['news', '📰 News']].map(([tab, label]) => (
+            <button key={tab} onClick={() => setActiveTab(tab)}
+              style={{ flex: 1, padding: '7px 4px', borderRadius: '8px', border: 'none', cursor: 'pointer', fontSize: '11px', fontWeight: 700, fontFamily: "'Cabinet Grotesk',sans-serif", background: activeTab === tab ? 'linear-gradient(135deg,#6366f1,#8b5cf6)' : 'transparent', color: activeTab === tab ? 'white' : '#6270a0', transition: 'all 0.2s' }}>
+              {label}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* Scrollable content */}
+      <div style={{ flex: 1, overflowY: 'auto', padding: '0 14px 14px' }} className="chat-scroll">
+
+        {/* ── ROADMAP TAB ── */}
+        {activeTab === 'roadmap' && (
+          <>
+            {!roadmap && !loading && (
+              <div style={{ background: '#0f1340', border: '1px solid rgba(99,102,241,0.12)', borderRadius: '14px', padding: '16px', marginBottom: '12px' }}>
+                <div style={{ fontSize: '13px', color: '#a8b4d8', lineHeight: 1.6, marginBottom: '14px' }}>
+                  Get a personalized step-by-step Web3 learning roadmap built by ASI-1 just for you.
+                </div>
+                <button onClick={onGenerate}
+                  style={{ width: '100%', background: 'linear-gradient(135deg,#6366f1,#8b5cf6)', border: 'none', color: 'white', padding: '11px', borderRadius: '10px', fontSize: '13px', fontWeight: 700, cursor: 'pointer', fontFamily: "'Cabinet Grotesk',sans-serif", boxShadow: '0 0 16px rgba(99,102,241,0.35)', transition: 'all 0.2s' }}
+                  onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-1px)'; e.currentTarget.style.boxShadow = '0 6px 20px rgba(99,102,241,0.5)'; }}
+                  onMouseLeave={e => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = '0 0 16px rgba(99,102,241,0.35)'; }}>
+                  ✨ Generate My Roadmap
+                </button>
+              </div>
+            )}
+
+            {loading && (
+              <div style={{ background: '#0f1340', border: '1px solid rgba(99,102,241,0.12)', borderRadius: '14px', padding: '20px', marginBottom: '12px', textAlign: 'center' }}>
+                <div style={{ width: '28px', height: '28px', border: '2.5px solid rgba(99,102,241,0.3)', borderTopColor: '#6366f1', borderRadius: '50%', animation: 'spin 0.8s linear infinite', margin: '0 auto 12px' }} />
+                <div style={{ fontSize: '12px', color: '#6270a0' }}>ASI-1 is building your roadmap...</div>
+                <style>{`@keyframes spin{to{transform:rotate(360deg);}}`}</style>
+              </div>
+            )}
+
+            {roadmap && (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                {roadmap.map((step, i) => (
+                  <div key={i} style={{ background: step.done ? 'rgba(52,211,153,0.06)' : '#0f1340', border: step.done ? '1px solid rgba(52,211,153,0.15)' : '1px solid rgba(99,102,241,0.1)', borderRadius: '12px', padding: '12px 14px', transition: 'all 0.2s' }}>
+                    <div style={{ display: 'flex', alignItems: 'flex-start', gap: '10px' }}>
+                      <div style={{ width: '24px', height: '24px', borderRadius: '6px', flexShrink: 0, background: step.done ? 'rgba(52,211,153,0.2)' : 'linear-gradient(135deg,#6366f1,#8b5cf6)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '11px', fontWeight: 800, color: step.done ? '#34d399' : 'white', marginTop: '1px' }}>{step.done ? '✓' : i + 1}</div>
+                      <div style={{ flex: 1, minWidth: 0 }}>
+                        <div style={{ fontSize: '12px', fontWeight: 700, color: step.done ? '#34d399' : '#f0f0ff', marginBottom: '3px', fontFamily: "'Cabinet Grotesk',sans-serif" }}>{step.title}</div>
+                        <div style={{ fontSize: '11px', color: '#6270a0', lineHeight: 1.5 }}>{step.desc}</div>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+                <button onClick={onGenerate}
+                  style={{ marginTop: '6px', background: 'transparent', border: '1px solid rgba(99,102,241,0.2)', color: '#6270a0', padding: '8px', borderRadius: '10px', fontSize: '11px', cursor: 'pointer', fontFamily: "'Plus Jakarta Sans',sans-serif", transition: 'all 0.2s' }}
+                  onMouseEnter={e => { e.currentTarget.style.borderColor = 'rgba(99,102,241,0.4)'; e.currentTarget.style.color = '#a5b4fc'; }}
+                  onMouseLeave={e => { e.currentTarget.style.borderColor = 'rgba(99,102,241,0.2)'; e.currentTarget.style.color = '#6270a0'; }}>
+                  ↺ Regenerate Roadmap
+                </button>
+              </div>
+            )}
+          </>
+        )}
+
+        {/* ── NEWS TAB ── */}
+        {activeTab === 'news' && (
+          <NewsFeed onAskAI={onAskAI} />
+        )}
+      </div>
+    </div>
+  );
+}
+
 // ── Input Bar ─────────────────────────────────────────────────────────────────
 function InputBar({ onSend, disabled }) {
   const [value, setValue] = useState('');
@@ -205,57 +304,48 @@ export default function ChatPage({ onLogout }) {
   useEffect(() => { messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' }); }, [messages, isTyping]);
 
   const now = useCallback(() => new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }), []);
-
-  // Use Firebase display name first, then profile name, then fallback
   const displayName = authUser?.displayName || userProfile?.name || 'Explorer';
 
-  // ── Session switch: load messages from cache when activeSessionId changes ─────────
+  // ── Session switch ────────────────────────────────────────────────────────
   useEffect(() => {
-    // Only run once history is loaded (AppContext has seeded data)
     if (!authUser?.uid || !historyLoaded) return;
-
-    // Try cache first — instant, no network
     const cached = sessions.find(s => s.id === activeSessionId);
     if (cached?.messages?.length > 0) {
       setMessages(cached.messages);
       setHistory(cached.messages.map(m => ({ role: m.role, content: m.content })));
       return;
     }
-
-    // If it's a brand-new session_XXX not yet in cache, do nothing —
-    // handleNewChat already set the welcome message synchronously.
-    // For 'main' or other known IDs not in cache, messages are already
-    // loaded by AppContext's loadUserHistory on login.
-    // We only need to handle the edge case of switching to a session that
-    // was deleted from cache but still exists in Firestore (rare).
-    // In that case, messages will just be empty and user can start fresh.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [authUser?.uid, activeSessionId]); // intentionally omit historyLoaded to avoid re-runs
-  // ── Session selection ──
-  const handleSelectSession = (id) => {
-    if (id === activeSessionId) return;
+  }, [authUser?.uid, activeSessionId]);
 
-    // Instantly load from cache (zero Firestore wait)
+  const handleSelectSession = async (id) => {
+    if (id === activeSessionId) return;
     const session = sessions.find(s => s.id === id);
     if (session?.messages?.length > 0) {
       setMessages(session.messages);
       setHistory(session.messages.map(m => ({ role: m.role, content: m.content })));
-      setHistoryLoaded(true); // mark loaded so auto-save works
+      setHistoryLoaded(true);
     } else {
-      // No cache hit — clear and let the effect fetch from Firestore
       setMessages([]);
       setHistory([]);
-      setHistoryLoaded(false);
+      try {
+        const { loadChatSession } = await import('../firebase/authService');
+        const firestoreSession = await loadChatSession(authUser.uid, id);
+        if (firestoreSession?.messages?.length > 0) {
+          setMessages(firestoreSession.messages);
+          setHistory(firestoreSession.messages.map(m => ({ role: m.role, content: m.content })));
+        }
+      } catch (err) {
+        console.error('Failed to load session from Firestore:', err);
+      }
+      setHistoryLoaded(true);
     }
-
-    setActiveSessionId(id); // triggers re-validation in background
+    setActiveSessionId(id);
   };
 
   const handleDeleteSession = async (id) => {
-    // Optimistic delete
     setSessions(prev => prev.filter(s => s.id !== id));
     if (activeSessionId === id) handleNewChat();
-
     try {
       await deleteChatSession(authUser.uid, id);
     } catch (err) {
@@ -265,21 +355,18 @@ export default function ChatPage({ onLogout }) {
     }
   };
 
-  // ── Auto-save chat history whenever messages change (debounced) ───────────────
+  // ── Auto-save ─────────────────────────────────────────────────────────────
   useEffect(() => {
     if (!historyLoaded) return;
     if (!authUser?.uid) return;
     if (messages.length === 0) return;
-    // Only save sessions that have at least one user message
     if (!messages.some(m => m.role === 'user')) return;
 
-    // 1. Debounced Firestore write (waits 1.5s of inactivity before saving)
     const timer = setTimeout(() => {
       saveChatSession(authUser.uid, activeSessionId, messages)
         .catch(err => console.error('Auto-save error:', err));
     }, 1500);
 
-    // 2. Eagerly update local sessions cache (instant, no debounce needed)
     setSessions(prev => {
       const idx = prev.findIndex(s => s.id === activeSessionId);
       const updated = {
@@ -295,19 +382,15 @@ export default function ChatPage({ onLogout }) {
       return next;
     });
 
-    return () => clearTimeout(timer); // cancel save if messages change again quickly
+    return () => clearTimeout(timer);
   }, [messages, historyLoaded, authUser?.uid, activeSessionId, setSessions]);
 
-  // ── New Chat: clear messages & Firestore ──────────────────────────────────────
+  // ── New Chat ──────────────────────────────────────────────────────────────
   const handleNewChat = useCallback(() => {
     if (!authUser?.uid) return;
-
-    // 1. Save current chat immediately if it has user messages
     if (messages.some(m => m.role === 'user')) {
       saveChatSession(authUser.uid, activeSessionId, messages).catch(() => { });
     }
-
-    // 2. Build welcome message to show INSTANTLY (no Firestore wait)
     const goalMap = { investing: 'crypto investing', nft: 'NFTs & digital art', defi: 'DeFi & yield', general: 'Web3 basics' };
     const goal = goalMap[userProfile?.goal] || 'Web3';
     const newSessionId = 'session_' + Date.now();
@@ -317,17 +400,14 @@ export default function ChatPage({ onLogout }) {
       content: `Hey **${displayName}**! 👋 ASI-1 here. Ready to dive into **${goal}**?\n\nI can help you build your roadmap or explain complex topics. What's on your mind?`,
       quickReplies: ['Generate roadmap', 'Explain Bitcoin', 'How to invest?'],
     };
-
-    // 3. Set all state at once — welcome shows immediately, no delay
     setMessages([welcomeMsg]);
     setHistory([]);
-    setHistoryLoaded(true);  // mark loaded so auto-save is armed
+    setHistoryLoaded(true);
     setActiveSessionId(newSessionId);
-
   }, [messages, authUser?.uid, activeSessionId, userProfile?.goal, displayName,
     setActiveSessionId, setHistoryLoaded, setMessages, setHistory]);
 
-  // ── Generate AI Roadmap ──────────────────────────────────────────────────────
+  // ── Generate Roadmap ──────────────────────────────────────────────────────
   const generateRoadmap = useCallback(async () => {
     setRoadmapLoading(true);
     setRoadmap(null);
@@ -362,7 +442,7 @@ Make the steps specific, practical and ordered from beginner to advanced for the
     }
   }, [now, setMessages, setRoadmap, userProfile]);
 
-  // ── Send message ──────────────────────────────────────────────────────────────
+  // ── Send message ──────────────────────────────────────────────────────────
   const sendMessage = useCallback(async (text) => {
     if (!text.trim() || isTyping) return;
     if (text.toLowerCase().includes('generate') && text.toLowerCase().includes('roadmap')) {
@@ -378,7 +458,7 @@ Make the steps specific, practical and ordered from beginner to advanced for the
       setHistory(prev => [...prev, { role: 'assistant', content: reply }]);
       const m = (text + reply).toLowerCase();
       let qr = ['Tell me more', 'Give me an example', 'What should I learn next?'];
-      if (m.includes('blockchain')) qr = ['How does mining work?', 'What is a smart contract?', 'Next: Wallets →'];
+      if (m.includes('blockchain')) qr = ['How does mining work?', 'What is a smart contract?', 'What is Wallets'];
       if (m.includes('wallet')) qr = ['How do I create one?', "What's a seed phrase?", 'How do I stay safe?'];
       if (m.includes('defi')) qr = ['What is yield farming?', 'What are liquidity pools?', 'Is DeFi risky?'];
       if (m.includes('nft')) qr = ['How do I buy an NFT?', 'What makes NFTs valuable?', 'What is a DAO?'];
@@ -419,7 +499,7 @@ Make the steps specific, practical and ordered from beginner to advanced for the
             <div style={{ fontFamily: "'Cabinet Grotesk',sans-serif", fontWeight: 800, fontSize: '15px', color: '#f0f0ff' }}>CryptoGuide Agent</div>
             <div style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
               <div style={{ width: '5px', height: '5px', borderRadius: '50%', background: '#34d399', animation: 'pulse 2s infinite' }} />
-              <span style={{ fontSize: '11px', color: '#34d399' }}>ASI-1 Online </span>
+              <span style={{ fontSize: '11px', color: '#34d399' }}>ASI-1 Online</span>
             </div>
           </div>
         </div>
@@ -433,7 +513,6 @@ Make the steps specific, practical and ordered from beginner to advanced for the
             onMouseEnter={e => { e.currentTarget.style.background = 'rgba(99,102,241,0.16)'; e.currentTarget.style.borderColor = 'rgba(99,102,241,0.4)'; }}
             onMouseLeave={e => { e.currentTarget.style.background = 'rgba(99,102,241,0.08)'; e.currentTarget.style.borderColor = 'rgba(99,102,241,0.2)'; }}>
             ➕ New Chat
-
           </button>
           <div style={{ textAlign: 'right' }}>
             <div style={{ fontFamily: "'Cabinet Grotesk',sans-serif", fontSize: '13px', fontWeight: 800, color: '#f0f0ff' }}>{displayName}</div>
@@ -474,6 +553,7 @@ Make the steps specific, practical and ordered from beginner to advanced for the
           roadmap={roadmap}
           loading={roadmapLoading}
           onGenerate={generateRoadmap}
+          onAskAI={sendMessage}
         />
       </div>
     </div>

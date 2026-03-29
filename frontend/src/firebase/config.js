@@ -1,6 +1,6 @@
 import { initializeApp } from 'firebase/app';
 import { getAuth } from 'firebase/auth';
-import { getFirestore } from 'firebase/firestore';
+import { initializeFirestore, getFirestore, memoryLocalCache } from 'firebase/firestore';
 
 const firebaseConfig = {
   apiKey: process.env.REACT_APP_FIREBASE_API_KEY,
@@ -13,4 +13,18 @@ const firebaseConfig = {
 
 const app = initializeApp(firebaseConfig);
 export const auth = getAuth(app);
-export const db = getFirestore(app);
+
+// Use memory-only cache + long polling for reliable cross-browser support.
+// This avoids corrupt IndexedDB cache issues and WebSocket blocking.
+let db;
+try {
+  db = initializeFirestore(app, {
+    experimentalForceLongPolling: true,
+    localCache: memoryLocalCache(),
+  });
+} catch (e) {
+  // Firestore already initialized (e.g. from hot-reload) — use existing instance
+  db = getFirestore(app);
+}
+
+export { db };
