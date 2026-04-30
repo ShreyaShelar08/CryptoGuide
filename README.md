@@ -11,7 +11,6 @@
 [![Flask](https://img.shields.io/badge/Flask-3.1-000000?style=flat-square&logo=flask)](https://flask.palletsprojects.com)
 [![Firebase](https://img.shields.io/badge/Firebase-Auth%20%2B%20Firestore-FFCA28?style=flat-square&logo=firebase&logoColor=black)](https://firebase.google.com)
 
-[🚀 Live Demo](https://crypto-guide-six.vercel.app)
 
 </div>
 
