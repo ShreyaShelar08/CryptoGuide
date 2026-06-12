@@ -91,7 +91,7 @@ function HeroMockup() {
 
 export default function Hero({ onGetStarted }) {
   const stats = [
-    { val: 'ASI-1', label: 'AI POWERED' },
+    { val: 'AI', label: 'AI POWERED' },
     { val: '100%',  label: 'FREE TO START' },
     { val: '$10K',  label: 'VIRTUAL CASH' },
   ];
@@ -106,9 +106,8 @@ export default function Hero({ onGetStarted }) {
       <div style={{ flex: 1, maxWidth: '560px', animation: 'fadeUp 0.8s ease both' }}>
         <div style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', background: 'rgba(99,102,241,0.1)', border: '1px solid rgba(99,102,241,0.25)', borderRadius: '999px', padding: '6px 16px', fontSize: '12px', fontWeight: 600, color: '#a5b4fc', letterSpacing: '0.5px', marginBottom: '28px' }}>
           <div style={{ width: '6px', height: '6px', borderRadius: '50%', background: '#a5b4fc', animation: 'pulse 2s infinite' }} />
-          Powered by ASI-1 Agentic AI
+          Powered by agentic AI
         </div>
-
         <h1 style={{ fontFamily: "'Cabinet Grotesk',sans-serif", fontSize: '58px', fontWeight: 900, lineHeight: 1.08, letterSpacing: '-2px', marginBottom: '24px', color: '#f0f0ff' }}>
           Start Your<br />
           <span style={{ background: 'linear-gradient(90deg,#818cf8,#c4b5fd,#67e8f9)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>Web3 Journey</span><br />

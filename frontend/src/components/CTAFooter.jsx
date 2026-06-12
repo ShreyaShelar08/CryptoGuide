@@ -40,7 +40,7 @@ export function CTA({ onGetStarted}) {
           fontSize: '16px', color: '#a8b4d8', maxWidth: '480px',
           margin: '0 auto 40px', lineHeight: 1.7,
         }}>
-          Join thousands of learners who started their Web3 journey with CryptoGuide. Free to start, powered by ASI-1.
+          Join thousands of learners who started their Web3 journey with CryptoGuide. Free to start, powered by AI.
         </p>
 
         <div style={{ display: 'flex', gap: '14px', justifyContent: 'center', flexWrap: 'wrap' }}>

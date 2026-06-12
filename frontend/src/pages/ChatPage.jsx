@@ -106,7 +106,7 @@ function HistoryPanel({ sessions, onSelectSession, activeSessionId, onDeleteSess
       <div style={{ marginTop: 'auto', paddingTop: '14px', borderTop: '1px solid rgba(99,102,241,0.08)' }}>
         <div style={{ background: 'rgba(99,102,241,0.06)', border: '1px solid rgba(99,102,241,0.12)', borderRadius: '10px', padding: '10px', textAlign: 'center' }}>
           <div style={{ fontSize: '10px', color: '#6270a0', letterSpacing: '1px', marginBottom: '4px' }}>POWERED BY</div>
-          <div style={{ fontFamily: "'Cabinet Grotesk',sans-serif", fontSize: '13px', fontWeight: 800, color: '#a5b4fc' }}>ASI-1 · Fetch.ai</div>
+          <div style={{ fontFamily: "'Cabinet Grotesk',sans-serif", fontSize: '13px', fontWeight: 800, color: '#a5b4fc' }}>AI</div>
         </div>
       </div>
     </div>
@@ -213,7 +213,7 @@ function RoadmapPanel({ roadmap, loading, onGenerate, onAskAI }) {
             {!roadmap && !loading && (
               <div style={{ background: '#0f1340', border: '1px solid rgba(99,102,241,0.12)', borderRadius: '14px', padding: '16px', marginBottom: '12px' }}>
                 <div style={{ fontSize: '13px', color: '#a8b4d8', lineHeight: 1.6, marginBottom: '14px' }}>
-                  Get a personalized step-by-step Web3 learning roadmap built by ASI-1 just for you.
+                  Get a personalized step-by-step Web3 learning roadmap built just for you.
                 </div>
                 <button onClick={onGenerate}
                   style={{ width: '100%', background: 'linear-gradient(135deg,#6366f1,#8b5cf6)', border: 'none', color: 'white', padding: '11px', borderRadius: '10px', fontSize: '13px', fontWeight: 700, cursor: 'pointer', fontFamily: "'Cabinet Grotesk',sans-serif", boxShadow: '0 0 16px rgba(99,102,241,0.35)', transition: 'all 0.2s' }}
@@ -227,7 +227,7 @@ function RoadmapPanel({ roadmap, loading, onGenerate, onAskAI }) {
             {loading && (
               <div style={{ background: '#0f1340', border: '1px solid rgba(99,102,241,0.12)', borderRadius: '14px', padding: '20px', marginBottom: '12px', textAlign: 'center' }}>
                 <div style={{ width: '28px', height: '28px', border: '2.5px solid rgba(99,102,241,0.3)', borderTopColor: '#6366f1', borderRadius: '50%', animation: 'spin 0.8s linear infinite', margin: '0 auto 12px' }} />
-                <div style={{ fontSize: '12px', color: '#6270a0' }}>ASI-1 is building your roadmap...</div>
+                <div style={{ fontSize: '12px', color: '#6270a0' }}>Your roadmap is being built...</div>
                 <style>{`@keyframes spin{to{transform:rotate(360deg);}}`}</style>
               </div>
             )}
@@ -289,7 +289,7 @@ function InputBar({ onSend, disabled }) {
           onMouseEnter={e => { if (value.trim() && !disabled) e.currentTarget.style.transform = 'scale(1.08)'; }}
           onMouseLeave={e => { e.currentTarget.style.transform = 'scale(1)'; }}>↑</button>
       </div>
-      <div style={{ textAlign: 'center', fontSize: '10px', color: '#6270a0', marginTop: '8px' }}>Powered by ASI-1 · Enter to send · Shift+Enter for new line</div>
+      <div style={{ textAlign: 'center', fontSize: '10px', color: '#6270a0', marginTop: '8px' }}>Powered by AI · Enter to send · Shift+Enter for new line</div>
     </div>
   );
 }
@@ -397,7 +397,7 @@ export default function ChatPage({ onLogout }) {
     const welcomeMsg = {
       id: Date.now() + 1, role: 'assistant',
       timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-      content: `Hey **${displayName}**! 👋 ASI-1 here. Ready to dive into **${goal}**?\n\nI can help you build your roadmap or explain complex topics. What's on your mind?`,
+      content: `Hey **${displayName}**! 👋 I'm here. Ready to dive into **${goal}**?\n\nI can help you build your roadmap or explain complex topics. What's on your mind?`,
       quickReplies: ['Generate roadmap', 'Explain Bitcoin', 'How to invest?'],
     };
     setMessages([welcomeMsg]);
@@ -465,6 +465,7 @@ Make the steps specific, practical and ordered from beginner to advanced for the
       if (m.includes('invest')) qr = ['Which coins are best for beginners?', 'How do I manage risk?', 'What is dollar-cost averaging?'];
       setMessages(prev => [...prev, { id: Date.now() + 1, role: 'assistant', content: reply, timestamp: now(), quickReplies: qr }]);
     } catch (err) {
+      console.error("Chat error:", err.message);
       setMessages(prev => [...prev, {
         id: Date.now() + 1, role: 'assistant', timestamp: now(),
         content: err.message?.includes('rate_limited') ? "⏳ Too fast! Please wait a moment." : "I'm having a moment — please try again! 🙏",
@@ -499,7 +500,7 @@ Make the steps specific, practical and ordered from beginner to advanced for the
             <div style={{ fontFamily: "'Cabinet Grotesk',sans-serif", fontWeight: 800, fontSize: '15px', color: '#f0f0ff' }}>CryptoGuide Agent</div>
             <div style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
               <div style={{ width: '5px', height: '5px', borderRadius: '50%', background: '#34d399', animation: 'pulse 2s infinite' }} />
-              <span style={{ fontSize: '11px', color: '#34d399' }}>ASI-1 Online</span>
+              <span style={{ fontSize: '11px', color: '#34d399' }}>AI Online</span>
             </div>
           </div>
         </div>

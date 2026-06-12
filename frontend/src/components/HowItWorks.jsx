@@ -2,7 +2,7 @@ import React from 'react';
 import { useReveal } from '../hooks/useReveal';
 
 const steps = [
-  { num: '01', icon: '🎯', title: 'Tell Us Your Goal', desc: 'Answer 2 quick questions — your Web3 goal and experience level. The ASI-1 agent instantly builds your personalized learning path.' },
+  { num: '01', icon: '🎯', title: 'Tell Us Your Goal', desc: 'Answer 2 quick questions — your Web3 goal and experience level. The agent instantly builds your personalized learning path.' },
   { num: '02', icon: '💬', title: 'Learn by Chatting', desc: 'Ask anything, anytime. The agent explains complex concepts with real-world analogies, remembers your context, and never makes you feel lost.' },
   { num: '03', icon: '🚀', title: 'Enter Web3 Confidently', desc: 'Complete all 7 modules and you\'ll know exactly how to set up a wallet, buy crypto safely, explore DeFi, and avoid scams.' },
 ];

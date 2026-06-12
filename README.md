@@ -2,11 +2,10 @@
 
 # ⬡ CryptoGuide
 
-### Your Personal Web3 Onboarding Agent — Powered by ASI-1
+### Your Personal Web3 Onboarding Agent — Powered by AI
 
 **Learn Web3 your way. Guided by AI, practiced risk-free.**
 
-[![ASI-1](https://img.shields.io/badge/ASI--1-Powered-6366f1?style=flat-square)](https://asi1.ai)
 [![React](https://img.shields.io/badge/React-18-61DAFB?style=flat-square&logo=react&logoColor=black)](https://reactjs.org)
 [![Flask](https://img.shields.io/badge/Flask-3.1-000000?style=flat-square&logo=flask)](https://flask.palletsprojects.com)
 [![Firebase](https://img.shields.io/badge/Firebase-Auth%20%2B%20Firestore-FFCA28?style=flat-square&logo=firebase&logoColor=black)](https://firebase.google.com)
@@ -18,14 +17,14 @@
 
 ## What is CryptoGuide?
 
-CryptoGuide is an AI-powered Web3 onboarding platform that helps complete beginners learn blockchain, crypto, DeFi and NFTs through a personalized AI agent, a custom learning roadmap, and a risk-free portfolio simulator powered by **ASI-1** by Fetch.ai.
+CryptoGuide is an AI-powered Web3 onboarding platform that helps complete beginners learn blockchain, crypto, DeFi and NFTs through a personalized AI agent, a custom learning roadmap, and a risk-free portfolio simulator.
 
 ---
 
 ## Features
 
-- 🤖 **ASI-1 Chat Agent** — Personalized Web3 guide that adapts to your goal and experience level
-- 🗺️ **AI Roadmap Generator** — ASI-1 builds a custom 6-step learning path based on your goal
+- 🤖 **AI Chat Agent** — Personalized Web3 guide that adapts to your goal and experience level
+- 🗺️ **AI Roadmap Generator** — The AI builds a custom 6-step learning path based on your goal
 - 📊 **Portfolio Simulator** — Practice with $10,000 virtual cash at real market prices, zero risk
 - 💬 **Chat History** — All conversations saved to Firestore and restored on every login
 - 🔐 **Firebase Auth** — Email and password login with persistent sessions
@@ -36,7 +35,7 @@ CryptoGuide is an AI-powered Web3 onboarding platform that helps complete beginn
 
 | Layer | Technology |
 |---|---|
-| AI | ASI-1 Mini by Fetch.ai |
+| AI | AI engine |
 | Frontend | React 18 (Create React App) |
 | Backend | Python + Flask |
 | Auth + Database | Firebase Authentication + Firestore |
@@ -67,7 +66,7 @@ source venv/bin/activate    # Mac/Linux
 venv\Scripts\activate       # Windows
 pip install -r requirements.txt
 cp .env.example .env
-# Add your ASI1_API_KEY in .env
+# Add your AI_API_KEY in .env
 python app.py
 ```
 
@@ -86,7 +85,7 @@ Open **http://localhost:3000** ✅
 
 ### `backend/.env`
 ```
-ASI1_API_KEY=your_asi1_api_key
+AI_API_KEY=your_ai_api_key
 FLASK_ENV=development
 PORT=5000
 ```

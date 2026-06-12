@@ -14,7 +14,7 @@ function makeWelcomeMsg(displayName, goal) {
     id: Date.now(),
     role: 'assistant',
     timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-    content: `Hey **${displayName}**! 👋 ASI-1 here. Ready to dive into **${goalLabel}**?\n\nI can help you build your roadmap or explain complex topics. What's on your mind?`,
+    content: `Hey **${displayName}**! 👋 I'm here. Ready to dive into **${goalLabel}**?\n\nI can help you build your roadmap or explain complex topics. What's on your mind?`,
     quickReplies: ['Generate roadmap', 'Explain Bitcoin', 'How to invest?'],
   };
 }

@@ -67,11 +67,11 @@ export default function Features() {
       </div>
 
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2,1fr)', gap: '20px' }}>
-        <FeatureCard icon="🤖" iconBg="rgba(99,102,241,0.15)" title="ASI-1 Agentic AI" desc="Powered by Fetch.ai's ASI-1 — a multi-step agentic LLM that adapts to your pace, remembers context, and gives you real answers — not generic responses." delay={0} />
+        <FeatureCard icon="🤖" iconBg="rgba(99,102,241,0.15)" title="Agentic AI" desc="Powered by Fetch.ai's multi-step agentic AI that adapts to your pace, remembers context, and gives you real answers — not generic responses." delay={0} />
 
         <FeatureCard icon="⚡" iconBg="rgba(34,211,238,0.12)" title="Instant Personalization" desc="Answer 2 quick questions about your goal and experience level. That's it — your AI agent is instantly calibrated to teach you exactly what you need." delay={0.1} />
 
-        <FeatureCard icon="🗺️" iconBg="rgba(167,139,250,0.12)" title="AI Roadmap Generator" desc="ASI-1 generates a personalized week-by-week learning roadmap based on your goal. No generic courses — a path built specifically for you, updated as you grow." delay={0.2} big>
+        <FeatureCard icon="🗺️" iconBg="rgba(167,139,250,0.12)" title="AI Roadmap Generator" desc="The agent generates a personalized week-by-week learning roadmap based on your goal. No generic courses — a path built specifically for you, updated as you grow." delay={0.2} big>
           <MiniRoadmap />
         </FeatureCard>
 

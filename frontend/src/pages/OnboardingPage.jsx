@@ -140,7 +140,7 @@ export default function OnboardingPage({ onComplete }) {
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
             <div style={{ width: '28px', height: '28px', borderRadius: '8px', background: 'linear-gradient(135deg,#6366f1,#8b5cf6)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '12px' }}>⬡</div>
             <div>
-              <div style={{ fontFamily: "'Cabinet Grotesk',sans-serif", fontSize: '14px', fontWeight: 800, color: '#f0f0ff' }}>ASI-1 by Fetch.ai</div>
+              <div style={{ fontFamily: "'Cabinet Grotesk',sans-serif", fontSize: '14px', fontWeight: 800, color: '#f0f0ff' }}>AI</div>
               <div style={{ fontSize: '11px', color: '#6270a0' }}>Agentic AI · Multi-step reasoning</div>
             </div>
           </div>

@@ -19,9 +19,9 @@ CORS(app, origins=[
 ])
 
 # ── Config ────────────────────────────────────────────────────────────────────
-ASI1_API_KEY    = os.getenv("ASI1_API_KEY", "")
-ASI1_ENDPOINT   = "https://api.asi1.ai/v1/chat/completions"
-ASI1_MODEL      = "asi1-mini"
+API_KEY    = os.getenv("HF_API_KEY", "")
+ENDPOINT    = "https://router.huggingface.co/v1/chat/completions"
+MODEL = "Qwen/Qwen2.5-7B-Instruct:together"
 MAX_TOKENS      = 500
 TEMPERATURE     = 0.75
 
@@ -79,7 +79,7 @@ def build_system_prompt(profile, portfolio=None):
             holdings_str = ", ".join(h_items) or "No holdings yet"
             portfolio_info = f"\nUser Portfolio Status:\n- Current Balance: ${balance:,.2f}\n- Holdings: {holdings_str}"
 
-    return f"""You are CryptoGuide, an expert Web3 onboarding agent powered by ASI-1 by Fetch.ai.
+    return f"""You are CryptoGuide, an expert Web3 onboarding agent powered by the AI.
 
 User profile:
 - Name: {name}
@@ -114,7 +114,7 @@ def health():
         "status": "ok",
         "service": "CryptoGuide API",
         "version": "1.0.0",
-        "asi1_configured": bool(ASI1_API_KEY),
+        "api_configured": bool(API_KEY),
     })
 
 
@@ -145,8 +145,8 @@ def chat():
     if not messages or not isinstance(messages, list):
         return jsonify({"error": "messages array is required"}), 400
 
-    if not ASI1_API_KEY:
-        return jsonify({"error": "ASI1_API_KEY not configured on server"}), 500
+    if not API_KEY:
+        return jsonify({"error": "API_KEY not configured on server"}), 500
 
     # Only keep role + content, strip any injected fields
     clean_messages = []
@@ -164,16 +164,15 @@ def chat():
     if not any(m["role"] == "user" for m in clean_messages):
         return jsonify({"error": "No valid user messages found in history"}), 400
 
-    # ── Call ASI-1 ────────────────────────────────────────────────────────────
     try:
         response = requests.post(
-            ASI1_ENDPOINT,
+            ENDPOINT ,
             headers={
                 "Content-Type": "application/json",
-                "Authorization": f"Bearer {ASI1_API_KEY}",
+                "Authorization": f"Bearer {API_KEY}",
             },
             json={
-                "model": ASI1_MODEL,
+                "model": MODEL,
                 "max_tokens": MAX_TOKENS,
                 "temperature": TEMPERATURE,
                 "messages": [
@@ -188,25 +187,25 @@ def chat():
         
         choices = result.get("choices", [])
         if not choices:
-            return jsonify({"error": "No response generated from ASI-1"}), 502
+            return jsonify({"error": "No response generated from API"}), 502
             
         reply = choices[0].get("message", {}).get("content")
         if not reply:
-            return jsonify({"error": "Empty response from ASI-1"}), 502
+            return jsonify({"error": "Empty response from API"}), 502
 
         return jsonify({
             "reply": reply,
-            "model": ASI1_MODEL,
+            "model": MODEL,
             "usage": result.get("usage", {}),
         })
 
     except requests.exceptions.Timeout:
-        return jsonify({"error": "ASI-1 request timed out. Please try again."}), 504
+        return jsonify({"error": "API request timed out. Please try again."}), 504
     except requests.exceptions.HTTPError as e:
         status_code = e.response.status_code if e.response else 500
-        return jsonify({"error": f"ASI-1 API error: {status_code}"}), 502
+        return jsonify({"error": f"API API error: {status_code}"}), 502
     except (KeyError, IndexError):
-        return jsonify({"error": "Unexpected response from ASI-1 API"}), 502
+        return jsonify({"error": "Unexpected response from API API"}), 502
     except Exception as e:
         return jsonify({"error": f"Server error: {str(e)}"}), 500
 
@@ -266,6 +265,6 @@ if __name__ == "__main__":
     port = int(os.getenv("PORT", 5000))
     debug = os.getenv("FLASK_ENV") == "development"
     print(f"\n🚀 CryptoGuide API running on http://localhost:{port}")
-    print(f"   ASI-1 Key: {'✅ configured' if ASI1_API_KEY else '❌ missing — set ASI1_API_KEY in .env'}")
+    print(f"   API Key: {'✅ configured' if API_KEY else '❌ missing — set API_KEY in .env'}")
     print(f"   Mode: {'development' if debug else 'production'}\n")
     app.run(host="0.0.0.0", port=port, debug=debug)
